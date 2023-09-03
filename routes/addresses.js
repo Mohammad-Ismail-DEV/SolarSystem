@@ -19,7 +19,7 @@ router.post("/", function (req, res) {
 
 router.post("/add_address", function (req, res) {
 	connection.query(
-		`Insert into addresses (country, city, road, building, floor, active, uid), 
+		`Update addresses set active = 0 where uid = req.body.user_id ;Insert into addresses (country, city, road, building, floor, active, uid), 
 		values('${req.body.country}','${req.body.city}','${req.body.road}', '${req.body.building}','${req.body.floor}', 1, ${req.body.user_id})`,
 		function (error, results) {
 			if (!error) {
@@ -33,7 +33,7 @@ router.post("/add_address", function (req, res) {
 
 router.post("/set_active", function (req, res) {
 	connection.query(
-		`Update addresses set active = 1 where id=${req.body.id}`,
+		`Update addresses set active = 0 where uid = req.body.user_id ;Update addresses set active = 1 where id=${req.body.id}`,
 		function (error, result) {
 			if (!error) {
 				res.send("Success")

@@ -72,5 +72,25 @@ router.post("/signup", function (req, res, next) {
 		)
 	} else res.send("Missing Feilds")
 })
+router.post("/update_user", function (req, res) {
+	var e = false
+	Object.keys(req.body).forEach((k) => {
+		if (k != "id" || "new_password" || "old_password" || "admin") {
+			connection.query(
+				`UPDATE users SET ${k}='${req.body[k]}' WHERE id=${req.body.id}`,
+				function (error, results, feilds) {
+					if (error) {
+						e = true
+					}
+				}
+			)
+		}
+	})
+	if (e == false) {
+		res.send("Success")
+	} else {
+		res.send("Something Went Wrong! Try Again Later")
+	}
+})
 
 module.exports = router

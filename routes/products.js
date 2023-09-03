@@ -68,7 +68,7 @@ router.post("/add_product", function (req, res, next) {
 
 router.post("/edit_product", function (req, res, next) {
 	var e = false
-	Object.keys(req.body).forEach((k, v) => {
+	Object.keys(req.body).forEach((k) => {
 		if (k != "id") {
 			connection.query(
 				`UPDATE products SET ${k}='${req.body[k]}' WHERE id=${req.body.id}`,

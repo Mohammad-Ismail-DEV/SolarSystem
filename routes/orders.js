@@ -36,10 +36,13 @@ router.post("/create_order", function (req, res) {
 				var f = false
 				req.body.products.forEach((element) => {
 					connection.query(
-						`Insert into orderproducts (order_id, product_id, quantity, order_price) 
-						values('${JSON.parse(JSON.stringify(results)).insertId}', ${element.id}, ${
+						`Insert into orderproducts (order_id, product_id, quantity, order_price) values(${
+							JSON.parse(JSON.stringify(results)).insertId
+						}, ${element.id}, ${element.quantity}, ${
+							element.price
+						}); UPDATE products SET stock=stock-${
 							element.quantity
-						}, ${element.price}) `,
+						} Where id=${element.id}`,
 						function (e) {
 							if (e) {
 								console.log("e", e)
@@ -61,6 +64,18 @@ router.post("/create_order", function (req, res) {
 })
 
 router.post("/set_status", function (req, res) {
+	if (req.body.status == "rejected" || "cancelled") {
+		connection.query(
+			`Select product_id, quantity from orderproducts where order_id = ${req.body.id}`,
+			function (error, results) {
+				JSON.parse(JSON.stringify(results)).forEach((element) => {
+					connection.query(
+						`Update products set stock=stock+${element.quantity} where id=${element.product_id} `
+					)
+				})
+			}
+		)
+	}
 	connection.query(
 		`Update orders set status = '${req.body.status}' where id=${req.body.id}`,
 		function (error, results) {
