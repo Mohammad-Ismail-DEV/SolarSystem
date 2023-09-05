@@ -5,13 +5,13 @@ var connection = require("../database.js")
 //router functions
 
 router.post("/", function (req, res) {
-	if (req.body.user_name) {
+	if (req.body.user_name != "") {
 		connection.query(
-			`Select * from orders Where uid=(Select id from users Where display_name=${req.body.user_name})`,
+			`Select * from orders Where uid=(Select id from users Where display_name='${req.body.user_name.toLowerCase()}')`,
 			function (error, results) {
 				var result = {
 					...result,
-					orders: JSON.parse(JSON.stringify(results))
+					orders: results
 				}
 				res.send(result)
 			}
@@ -20,11 +20,38 @@ router.post("/", function (req, res) {
 		connection.query(`Select * from orders`, function (error, results) {
 			var result = {
 				...result,
-				orders: JSON.parse(JSON.stringify(results))
+				orders: results
 			}
 			res.send(result)
 		})
 	}
+})
+
+router.post("/get_order", function (req, res) {
+	connection.query(
+		`SELECT users.display_name, product_id, products.name, quantity, order_price, order_id, orders.status, uid from users,orderproducts, products  JOIN orders on orders.id =${req.body.order_id} WHERE order_id=${req.body.order_id} && users.id = uid && products.id=product_id`,
+		function (error, results) {
+			var total = 0
+			var products = []
+			results.forEach((element) => {
+				total = total + element.order_price * element.quantity
+				products.push({
+					name: element.name,
+					quantity: element.quantity,
+					price: element.order_price
+				})
+			})
+			var result = {
+				...result,
+				user_name: results[0].display_name,
+				order_status: results[0].status,
+				order_id: results[0].order_id,
+				order_total: total,
+				products: products
+			}
+			res.send(result)
+		}
+	)
 })
 
 router.post("/create_order", function (req, res) {
@@ -36,13 +63,7 @@ router.post("/create_order", function (req, res) {
 				var f = false
 				req.body.products.forEach((element) => {
 					connection.query(
-						`Insert into orderproducts (order_id, product_id, quantity, order_price) values(${
-							JSON.parse(JSON.stringify(results)).insertId
-						}, ${element.id}, ${element.quantity}, ${
-							element.price
-						}); UPDATE products SET stock=stock-${
-							element.quantity
-						} Where id=${element.id}`,
+						`Insert into orderproducts (order_id, product_id, quantity, order_price) values(${results.insertId}, ${element.id}, ${element.quantity}, ${element.price}); UPDATE products SET stock=stock-${element.quantity} Where id=${element.id}`,
 						function (e) {
 							if (e) {
 								console.log("e", e)
@@ -54,6 +75,7 @@ router.post("/create_order", function (req, res) {
 				if (f) {
 					res.send("Something Went Wrong! Try Again Later")
 				} else {
+					console.log("success")
 					res.send("Success")
 				}
 			} else {
@@ -68,7 +90,7 @@ router.post("/set_status", function (req, res) {
 		connection.query(
 			`Select product_id, quantity from orderproducts where order_id = ${req.body.id}`,
 			function (error, results) {
-				JSON.parse(JSON.stringify(results)).forEach((element) => {
+				results.forEach((element) => {
 					connection.query(
 						`Update products set stock=stock+${element.quantity} where id=${element.product_id} `
 					)

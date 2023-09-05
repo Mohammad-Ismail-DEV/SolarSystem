@@ -19,8 +19,8 @@ router.post("/", function (req, res) {
 
 router.post("/add_address", function (req, res) {
 	connection.query(
-		`Update addresses set active = 0 where uid = req.body.user_id ;Insert into addresses (country, city, road, building, floor, active, uid), 
-		values('${req.body.country}','${req.body.city}','${req.body.road}', '${req.body.building}','${req.body.floor}', 1, ${req.body.user_id})`,
+		`Update addresses set active = 0 where uid = ${req.body.user_id} ;Insert into addresses (country, city, road, building, floor, active, uid) 
+		values('${req.body.country}','${req.body.city}','${req.body.road}', '${req.body.building}', ${req.body.floor}, 1, ${req.body.user_id})`,
 		function (error, results) {
 			if (!error) {
 				res.send("Success")

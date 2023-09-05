@@ -16,4 +16,17 @@ router.post("/", function (req, res) {
 	)
 })
 
+router.post("/add_category", function (req, res) {
+	connection.query(
+		`Insert into categories (name) values('${req.body.name}')`,
+		function (error, results) {
+			if (!error) {
+				res.send("Success")
+			} else {
+				res.send("Something Went Wrong! Try Again Later")
+			}
+		}
+	)
+})
+
 module.exports = router
