@@ -22,7 +22,7 @@ router.post("/login", function (req, res, next) {
 			var result = {
 				...result,
 				status: 1,
-				user: JSON.parse(JSON.stringify(results))
+				user: JSON.parse(JSON.stringify(results))[0]
 			}
 			if (result.user.length == 0) {
 				res.send("Wrong Email or Password")
@@ -58,9 +58,9 @@ router.post("/signup", function (req, res, next) {
 									function (error, results, fields) {
 										var result = {
 											...result,
-											result: JSON.parse(
+											user: JSON.parse(
 												JSON.stringify(results)
-											)
+											)[0]
 										}
 										res.send(result)
 									}
@@ -75,7 +75,7 @@ router.post("/signup", function (req, res, next) {
 router.post("/update_user", function (req, res) {
 	var e = false
 	Object.keys(req.body).forEach((k) => {
-		if (k != "id" || "new_password" || "old_password" || "admin") {
+		if (k != "id" || "new_password" || "old_password" || "admin" || "") {
 			connection.query(
 				`UPDATE users SET ${k}='${req.body[k]}' WHERE id=${req.body.id}`,
 				function (error, results, feilds) {
@@ -87,7 +87,22 @@ router.post("/update_user", function (req, res) {
 		}
 	})
 	if (e == false) {
-		res.send("Success")
+		connection.query(
+			`SELECT email, display_name, id, photo_url, admin, phone_prefix, phone_number FROM users 
+		WHERE id='${req.body.id}'`,
+			function (error, results, fields) {
+				var result = {
+					...result,
+					status: 1,
+					user: JSON.parse(JSON.stringify(results))[0]
+				}
+				if (result.user.length == 0) {
+					res.send("Wrong Email or Password")
+				} else {
+					res.send(result)
+				}
+			}
+		)
 	} else {
 		res.send("Something Went Wrong! Try Again Later")
 	}

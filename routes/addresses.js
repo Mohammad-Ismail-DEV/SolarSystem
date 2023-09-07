@@ -8,10 +8,14 @@ router.post("/", function (req, res) {
 	connection.query(
 		`Select * from addresses where uid='${req.body.user_id}'`,
 		function (error, results) {
+			results.forEach((element) => {
+				element.active = element.active == 1
+			})
 			var result = {
 				...result,
-				addresses: JSON.parse(JSON.stringify(results))
+				addresses: results
 			}
+			console.log("result", result)
 			res.send(result)
 		}
 	)
@@ -33,11 +37,12 @@ router.post("/add_address", function (req, res) {
 
 router.post("/set_active", function (req, res) {
 	connection.query(
-		`Update addresses set active = 0 where uid = req.body.user_id ;Update addresses set active = 1 where id=${req.body.id}`,
+		`Update addresses set active = 0 where uid = ${req.body.user_id} ;Update addresses set active = 1 where id=${req.body.id}`,
 		function (error, result) {
 			if (!error) {
 				res.send("Success")
 			} else {
+				console.log("error", error)
 				res.send("Something Went Wrong! Try Agaian Later")
 			}
 		}
