@@ -13,12 +13,18 @@ router.post("/", function (req, res) {
 	}
 	var nbBattery = Math.ceil(req.body.night / batteryCap)
 	connection.query(
-		`Select * from products where info>=${panelCap} && category_id=2; Select * from products where info>=${req.body.day} && category_id=1`,
+		`Select * from products where info>=${panelCap} && category_id=2 Order By info asc; Select * from products where info>=${req.body.day} && category_id=1 Order By info asc`,
 		function (error, results) {
-			console.log("results", results)
 			var result = {}
+			console.log("results", results)
 			if (results[0].length == 0) {
-				res.send("Insuffecient Number of Panels")
+				result = {
+					...result,
+					panel: "Insuffecient Number of Panels",
+					inverter: JSON.parse(JSON.stringify(results[1][0])).name,
+					batteries: nbBattery
+				}
+				res.send(result)
 			} else {
 				result = {
 					...result,
