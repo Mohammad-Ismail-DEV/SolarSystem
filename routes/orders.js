@@ -5,7 +5,7 @@ var connection = require("../database.js")
 //router functions
 
 router.post("/", function (req, res) {
-	if (req.body.user_name != "") {
+	if (req.body.user_name && req.body.user_name != "") {
 		connection.query(
 			`Select * from orders Where uid=(Select id from users Where display_name='${req.body.user_name.toLowerCase()}')`,
 			function (error, results) {
@@ -17,24 +17,25 @@ router.post("/", function (req, res) {
 			}
 		)
 	} else {
-		connection.query(`Select * from orders`, function (error, results) {
-			var result = {
-				...result,
-				orders: results
+		connection.query(
+			`Select orders.id, status, uid, total, date_created, users.display_name from orders join users on users.id=uid`,
+			function (error, results) {
+				var result = {
+					...result,
+					orders: results
+				}
+				res.send(result)
 			}
-			res.send(result)
-		})
+		)
 	}
 })
 
 router.post("/get_order", function (req, res) {
 	connection.query(
-		`SELECT users.display_name, product_id, products.name, quantity, order_price, order_id, orders.status, uid from users,orderproducts, products  JOIN orders on orders.id =${req.body.order_id} WHERE order_id=${req.body.order_id} && users.id = uid && products.id=product_id`,
+		`SELECT users.display_name, product_id, products.name, quantity, order_price, order_id, orders.status, orders.total, uid from users,orderproducts, products  JOIN orders on orders.id =${req.body.order_id} WHERE order_id=${req.body.order_id} && users.id = uid && products.id=product_id`,
 		function (error, results) {
-			var total = 0
 			var products = []
 			results.forEach((element) => {
-				total = total + element.order_price * element.quantity
 				products.push({
 					name: element.name,
 					quantity: element.quantity,
@@ -46,7 +47,8 @@ router.post("/get_order", function (req, res) {
 				user_name: results[0].display_name,
 				order_status: results[0].status,
 				order_id: results[0].order_id,
-				order_total: total,
+				order_total: results[0].total,
+				date_created: results[0].date_created,
 				products: products
 			}
 			res.send(result)
@@ -55,8 +57,12 @@ router.post("/get_order", function (req, res) {
 })
 
 router.post("/create_order", function (req, res) {
+	var total = 0
+	req.body.products.forEach((element) => {
+		total = total + element.order_price * element.quantity
+	})
 	connection.query(
-		`Insert into orders (uid, status) values ('${req.body.user_id}', 'pending')`,
+		`Insert into orders (uid, status,total) values ('${req.body.user_id}', 'pending', ${total})`,
 		function (error, results) {
 			console.log("error", error)
 			if (!error) {
