@@ -33,7 +33,7 @@ router.post("/get_cart", function (req, res) {
 router.post("/add_cart", function (req, res) {
 	var total = 0
 	req.body.products.forEach((element) => {
-		total = total + element.price * element.quantity
+		total = total + element.price * 1
 	})
 	connection.query(
 		`Select id from cart where uid=${req.body.user_id}`,
@@ -49,7 +49,7 @@ router.post("/add_cart", function (req, res) {
 						connection.query(
 							`Update cart set total=total+${total}; Insert into cartItems (cart_id, product_id, quantity, price) values(${
 								JSON.parse(JSON.stringify(results))[0].id
-							}, ${element.id}, ${element.quantity}, ${
+							}, ${element.id}, 1 , ${
 								element.price
 							})`,
 							function (e) {

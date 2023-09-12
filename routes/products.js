@@ -95,13 +95,14 @@ router.post("/delete_product", function (req, res, next) {
 	)
 })
 
-router.post("/by_id", function (req, res, next) {
+router.post("/by_name", function (req, res, next) {
 	connection.query(
-		`SELECT * FROM products where id=${req.body.id}`,
+		`SELECT * FROM products where name='${req.body.name}'`,
 		function (error, results, fields) {
 			var result = {
 				...JSON.parse(JSON.stringify(results))[0]
 			}
+			
 			res.send(result)
 		}
 	)
