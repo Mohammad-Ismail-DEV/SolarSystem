@@ -21,15 +21,17 @@ router.post("/login", function (req, res, next) {
 			req.body.password
 		}'`,
 		function (error, results, fields) {
-			results[0].admin = results[0].admin == 1
-			var result = {
-				...result,
-				status: 1,
-				user: JSON.parse(JSON.stringify(results))[0]
-			}
-			if (result.user.length == 0) {
+			console.log(error)
+		
+			if (JSON.parse(JSON.stringify(results)).length == 0) {
 				res.send("Wrong Email or Password")
 			} else {
+				results[0].admin = results[0].admin == 1
+				var result = {
+					...result,
+					status: 1,
+					user: JSON.parse(JSON.stringify(results))[0]
+				}
 				res.send(result)
 			}
 		}
@@ -52,12 +54,12 @@ router.post("/signup", function (req, res, next) {
 				}
 				if (result.result.length == 0) {
 					connection.query(
-						`INSERT Into users (email, password,display_name,phone_number,phone_prefix) values 
+						`INSERT Into users (email, password,display_name,phone_number,phone_prefix,photo_url) values 
         ('${req.body.email.toLowerCase()}', '${req.body.password}', '${
 							req.body.display_name
 						}', '${req.body.phone_number}', '${
 							req.body.phone_prefix
-						}')`,
+						}','https://images.unsplash.com/photo-1518977081765-9b1b0c2538e2?w=1280&h=720')`,
 						function (error, results, fields) {
 							if (!error)
 								connection.query(
@@ -65,6 +67,7 @@ router.post("/signup", function (req, res, next) {
 									function (error, results, fields) {
 										var result = {
 											...result,
+											status: 1,
 											user: JSON.parse(
 												JSON.stringify(results)
 											)[0]
