@@ -5,7 +5,7 @@ var connection = require("../database.js")
 //router functions
 router.post("/", function (req, res) {
 	connection.query(
-		`Select * from categories`,
+		`Select name from categories`,
 		function (error, results, feilds) {
 			var result = {
 				...result,
