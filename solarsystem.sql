@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Sep 08, 2023 at 05:26 PM
+-- Generation Time: Sep 12, 2023 at 09:44 PM
 -- Server version: 8.0.31
 -- PHP Version: 8.2.0
 
@@ -48,6 +48,51 @@ INSERT INTO `addresses` (`id`, `country`, `city`, `road`, `building`, `floor`, `
 (10, 'Iraq', 'Najaf', 'Imam Ali', 'Al Shames Hotel', 2, 1, 3),
 (9, 'Lebanon', 'Batroun', 'Old Market', 'Anywhere', 0, 0, 3),
 (7, 'Lebanon', 'Beirut', 'Al Ajniha AL Khamsa', 'Al Taweel', 3, 0, 3);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `cart`
+--
+
+DROP TABLE IF EXISTS `cart`;
+CREATE TABLE IF NOT EXISTS `cart` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `uid` int NOT NULL,
+  `total` double(10,2) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `cart`
+--
+
+INSERT INTO `cart` (`id`, `uid`, `total`) VALUES
+(1, 1, 800.00);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `cartitems`
+--
+
+DROP TABLE IF EXISTS `cartitems`;
+CREATE TABLE IF NOT EXISTS `cartitems` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `cart_id` int NOT NULL,
+  `product_id` int NOT NULL,
+  `quantity` int NOT NULL,
+  `price` double(10,2) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `cartitems`
+--
+
+INSERT INTO `cartitems` (`id`, `cart_id`, `product_id`, `quantity`, `price`) VALUES
+(1, 1, 1, 2, 160.00),
+(3, 1, 1, 3, 160.00);
 
 -- --------------------------------------------------------
 
@@ -120,7 +165,7 @@ CREATE TABLE IF NOT EXISTS `products` (
   `id` int NOT NULL AUTO_INCREMENT,
   `stock` int NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `products`
@@ -132,7 +177,8 @@ INSERT INTO `products` (`name`, `price`, `info`, `photo_url`, `category_id`, `id
 ('Must Pro Inverter', 350.00, 5200, 'https://www.edfenergy.com/sites/default/files/styles/spire_tile__media__full__media_natural_aspect/public/picture3.jpg?itok=lxZAA9uL', 1, 3, 50),
 ('Jinko Tiger Pro P-type', 180.00, 550, 'https://5.imimg.com/data5/GK/ED/MY-31702147/1kw-solax-grid-tie-inverter.png', 2, 4, 50),
 ('Lead-Acid Battery', 600.00, 3000, 'https://5.imimg.com/data5/SELLER/Default/2022/10/RU/KM/LL/59750563/72-cells-monocrystalline-solar-panel-500x500.jpg', 3, 5, 50),
-('Must Inverter', 300.00, 3500, 'https://www.edfenergy.com/sites/default/files/styles/spire_tile__media__full__media_natural_aspect/public/picture3.jpg?itok=lxZAA9uL', 1, 6, 50);
+('Must Inverter', 300.00, 3500, 'https://www.edfenergy.com/sites/default/files/styles/spire_tile__media__full__media_natural_aspect/public/picture3.jpg?itok=lxZAA9uL', 1, 6, 50),
+('test', 30.00, 0, '', 2, 9, 0);
 
 -- --------------------------------------------------------
 
