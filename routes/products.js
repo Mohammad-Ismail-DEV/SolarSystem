@@ -29,14 +29,9 @@ router.post("/", function (req, res, next) {
 })
 
 router.post("/add_product", function (req, res, next) {
-	if (
-		req.body.name &&
-		req.body.price &&
-		req.body.info &&
-		req.body.category_id
-	) {
+	if (req.body.name && req.body.price && req.body.info && req.body.category) {
 		connection.query(
-			`Select * FROM categories WHERE id='${req.body.category_id}'`,
+			`Select id FROM categories WHERE name='${req.body.category}'`,
 			function (error, results, feilds) {
 				var result = {
 					...result,
@@ -44,8 +39,8 @@ router.post("/add_product", function (req, res, next) {
 				}
 				if (result.result.length > 0) {
 					connection.query(
-						`INSERT INTO products (name,price,info,photo_url,category_id) 
-                values('${req.body.name}','${req.body.price}','${req.body.info}','${req.body.photo_url}','${req.body.category_id}')`,
+						`INSERT INTO products (name,price,info,photo_url,category_id)
+					      values('${req.body.name}','${req.body.price}','${req.body.info}','','${result.result[0].id}')`,
 						function (error, results, fields) {
 							if (!error) {
 								res.send("Success")

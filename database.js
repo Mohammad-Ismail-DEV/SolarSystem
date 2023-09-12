@@ -5,7 +5,7 @@ var connection = mysql.createConnection({
 	user: "root",
 	password: "",
 	database: "solarsystem",
-	port : 3308
+	port: 3308
 })
 connection.connect((err) => {
 	if (err) {
