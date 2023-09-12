@@ -7,9 +7,13 @@ router.post("/", function (req, res) {
 	connection.query(
 		`Select name from categories`,
 		function (error, results, feilds) {
+			var cat = []
+			JSON.parse(JSON.stringify(results)).forEach((element) => {
+				cat.push(element.name)
+			})
 			var result = {
 				...result,
-				categories: JSON.parse(JSON.stringify(results))
+				categories: cat
 			}
 			res.send(result)
 		}
