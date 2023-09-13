@@ -57,36 +57,52 @@ router.post("/get_order", function (req, res) {
 })
 
 router.post("/create_order", function (req, res) {
-	var total = 0
-	req.body.products.forEach((element) => {
-		total = total + element.order_price * element.quantity
-	})
 	connection.query(
-		`Insert into orders (uid, status,total) values ('${req.body.user_id}', 'pending', ${total})`,
+		`SELECT cart.id as cid, cart.total, product_id, quantity, cartItems.price, products.name FROM cart,cartitems JOIN products on products.id WHERE cart.uid=${req.body.user_id} && cart_id=cart.id && products.id = product_id`,
 		function (error, results) {
-			console.log("error", error)
-			if (!error) {
-				var f = false
-				req.body.products.forEach((element) => {
-					connection.query(
-						`Insert into orderproducts (order_id, product_id, quantity, order_price) values(${results.insertId}, ${element.id}, ${element.quantity}, ${element.price}); UPDATE products SET stock=stock-${element.quantity} Where id=${element.id}`,
-						function (e) {
-							if (e) {
-								console.log("e", e)
-								f = true
-							}
-						}
-					)
+			var products = []
+			results.forEach((element) => {
+				products.push({
+					name: element.name,
+					quantity: element.quantity,
+					price: element.price
 				})
-				if (f) {
-					res.send("Something Went Wrong! Try Again Later")
-				} else {
-					console.log("success")
-					res.send("Success")
-				}
-			} else {
-				res.send("Something Went Wrong! Try Again Later")
+			})
+
+			var result = {
+				...result,
+				cart_id: results[0].cid,
+				cart_total: results[0].total,
+				products: products
 			}
+			connection.query(
+				`Insert Into orders (uid, status) values (${req.body.user_id}, 'pending')`,
+				function (error, results) {
+					result.products.forEach((element) => {
+						connection.query(
+							`Insert into orderProducts (order_id, product_id, quantity, order_price) values (${results.insertId}, ${element.product_id}, ${element.quantity}, ${element.price})`,
+							function (error, results) {
+								if (!error) {
+									var e = false
+									connection.query(
+										`Delete from cartItems Where cart_id=${req.body.cart_id}; Delete from cart Where id=${req.body.cart_id}`,
+										function (error, results) {
+											if (error) {
+												e = true
+											}
+										}
+									)
+									if (e == false) {
+										res.send("Success")
+									}
+								} else {
+									console.log("error", error)
+								}
+							}
+						)
+					})
+				}
+			)
 		}
 	)
 })

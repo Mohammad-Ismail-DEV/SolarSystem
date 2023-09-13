@@ -33,7 +33,6 @@ router.post("/get_cart", function (req, res) {
 router.post("/add_cart", function (req, res) {
 	console.log(req.body)
 	var total = req.body.product.price * req.body.quantity
-	
 	connection.query(
 		`Select id from cart where uid=${req.body.user_id}`,
 		function (error, results) {
@@ -96,12 +95,92 @@ router.post("/add_cart", function (req, res) {
 	)
 })
 
+router.post("/change_quantity", function (req, res) {
+	connection.query(
+		`Select quantity, price from cartItems where id=${req.body.id}`,
+		function (error, results) {
+			var remove = results[0].quantity * results[0].price
+			var add = results[0].price * req.body.quantity
+			connection.query(
+				`Update cart set total=total-${remove}+${add} where id=${req.body.cart_id}`,
+				function (error, results) {
+					connection.query(
+						`Update cartItems set quantity=${req.body.quantity} where id =${req.body.id}`,
+						function (error, results) {
+							connection.query(
+								`SELECT cart.id as cid, cart.total, product_id, quantity, cartItems.price, products.name FROM cart,cartitems JOIN products on products.id WHERE cart.uid=${req.body.user_id} && cart_id=cart.id && products.id = product_id`,
+								function (error, results) {
+									var products = []
+									results.forEach((element) => {
+										products.push({
+											name: element.name,
+											quantity: element.quantity,
+											price: element.price
+										})
+									})
+
+									var result = {
+										...result,
+										cart_id: results[0].cid,
+										cart_base: results[0].total,
+										cart_taxes: results[0].total * 0.1,
+										cart_total: Math.floor(
+											results[0].total * 1.1
+										),
+										products: products
+									}
+									res.send(result)
+								}
+							)
+						}
+					)
+				}
+			)
+		}
+	)
+})
+
+router.post("/remove", function (req, res) {
+	connection.query(
+		`Select quantity, price from cartItems where id=${req.body.id}`,
+		function (error, results) {
+			var remove = results[0].quantity * results[0].price
+			connection.query(
+				`Update cart set total=total-${remove} where id=${req.body.cart_id}; Delete from cartItems where id=${req.body.id}`,
+				function (error, results) {
+					connection.query(
+						`SELECT cart.id as cid, cart.total, product_id, quantity, cartItems.price, products.name FROM cart,cartitems JOIN products on products.id WHERE cart.uid=${req.body.user_id} && cart_id=cart.id && products.id = product_id`,
+						function (error, results) {
+							var products = []
+							results.forEach((element) => {
+								products.push({
+									name: element.name,
+									quantity: element.quantity,
+									price: element.price
+								})
+							})
+
+							var result = {
+								...result,
+								cart_id: results[0].cid,
+								cart_base: results[0].total,
+								cart_taxes: results[0].total * 0.1,
+								cart_total: Math.floor(results[0].total * 1.1),
+								products: products
+							}
+							res.send(result)
+						}
+					)
+				}
+			)
+		}
+	)
+})
+
 router.post("/clear_cart", function (req, res) {
 	connection.query(
 		`Delete from cartItems Where cart_id=${req.body.cart_id}; Delete from cart Where id=${req.body.cart_id}`,
 		function (error, results) {
-			console.log("error", error)
-			console.log("results", results)
 			if (!error) {
 				res.send("success")
 			} else {
