@@ -8,16 +8,18 @@ router.post("/get_cart", function (req, res) {
 	connection.query(
 		`SELECT cart.id as cid, cart.total, product_id, quantity, cartItems.price, cartItems.id as item_id, products.name FROM cart,cartitems JOIN products on products.id WHERE cart.uid=${req.body.user_id} && cart_id=cart.id && products.id = product_id`,
 		function (error, results) {
+			console.log(error)
 			var products = []
+
 			results.forEach((element) => {
 				products.push({
-					id: element.cart_id,
+					id: element.item_id,
 					name: element.name,
 					quantity: element.quantity,
 					price: element.price
 				})
 			})
-
+			
 			var result = {
 				...result,
 				cart_id: results[0].cid,
