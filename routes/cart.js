@@ -11,25 +11,29 @@ router.post("/get_cart", function (req, res) {
 			console.log(error)
 			var products = []
 
-			results.forEach((element) => {
-				products.push({
-					id: element.item_id,
-					name: element.name,
-					quantity: element.quantity,
-					price: element.price,
-					photo_url: element.photo_url
+			if(results.length > 0){
+				results.forEach((element) => {
+					products.push({
+						id: element.item_id,
+						name: element.name,
+						quantity: element.quantity,
+						price: element.price,
+						photo_url: element.photo_url
+					})
 				})
-			})
-
-			var result = {
-				...result,
-				cart_id: results[0].cid,
-				cart_base: results[0].total,
-				cart_taxes: results[0].total * 0.1,
-				cart_total: Math.floor(results[0].total * 1.1),
-				products: products
+	
+				var result = {
+					...result,
+					cart_id: results[0].cid,
+					cart_base: results[0].total,
+					cart_taxes: results[0].total * 0.1,
+					cart_total: Math.floor(results[0].total * 1.1),
+					products: products
+				}
+				res.send(result)
+			}else{
+				res.send({products:[]})
 			}
-			res.send(result)
 		}
 	)
 })
@@ -154,8 +158,13 @@ router.post("/remove", function (req, res) {
 				function (error, results) {
 					connection.query(
 						`SELECT cart.id as cid, cart.total, product_id, quantity, cartItems.price, products.name FROM cart,cartitems JOIN products on products.id WHERE cart.uid=${req.body.user_id} && cart_id=cart.id && products.id = product_id`,
+					
 						function (error, results) {
-							var products = []
+							console.log(error)
+							if(results.length>0){
+								var products = []
+							console.log(error)
+							console.log(results)
 							results.forEach((element) => {
 								products.push({
 									name: element.name,
@@ -173,6 +182,11 @@ router.post("/remove", function (req, res) {
 								products: products
 							}
 							res.send(result)
+							}else
+							{
+								res.send({products:[]})
+							}
+							
 						}
 					)
 				}

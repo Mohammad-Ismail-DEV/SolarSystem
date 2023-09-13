@@ -9,6 +9,12 @@ router.post("/", function (req, res) {
 		connection.query(
 			`Select * from orders Where uid=(Select id from users Where display_name='${req.body.user_name.toLowerCase()}')`,
 			function (error, results) {
+				var date
+				results.forEach(element => {
+					date = element.date_created
+					let s=JSON.parse(JSON.stringify(date)).split("T")
+					element.date_created = s[0]
+				});
 				var result = {
 					...result,
 					orders: results
@@ -18,8 +24,14 @@ router.post("/", function (req, res) {
 		)
 	} else {
 		connection.query(
-			`Select orders.id, status, uid, total, date_created, users.display_name from orders join users on users.id=uid`,
+			`Select orders.id, status, uid, total, date_created, display_name from orders join users on users.id=uid`,
 			function (error, results) {
+				var date
+				results.forEach(element => {
+					date = element.date_created
+					let s=JSON.parse(JSON.stringify(date)).split("T")
+					element.date_created = s[0]
+				});
 				var result = {
 					...result,
 					orders: results
@@ -42,6 +54,7 @@ router.post("/get_order", function (req, res) {
 					price: element.order_price
 				})
 			})
+			console.log(results[0])
 			var result = {
 				...result,
 				user_name: results[0].display_name,
@@ -65,18 +78,19 @@ router.post("/create_order", function (req, res) {
 				products.push({
 					name: element.name,
 					quantity: element.quantity,
-					price: element.price
+					price: element.price,
+					product_id : element.product_id
 				})
 			})
 
 			var result = {
 				...result,
 				cart_id: results[0].cid,
-				cart_total: results[0].total,
+				cart_total: results[0].total*1.1,
 				products: products
 			}
 			connection.query(
-				`Insert Into orders (uid, status) values (${req.body.user_id}, 'pending')`,
+				`Insert Into orders (uid, status, total) values (${req.body.user_id}, 'pending', ${result.cart_total})`,
 				function (error, results) {
 					var e = false
 					result.products.forEach((element) => {
