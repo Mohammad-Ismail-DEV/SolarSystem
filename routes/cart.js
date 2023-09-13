@@ -108,11 +108,12 @@ router.post("/change_quantity", function (req, res) {
 						`Update cartItems set quantity=${req.body.quantity} where id =${req.body.id}`,
 						function (error, results) {
 							connection.query(
-								`SELECT cart.id as cid, cart.total, product_id, quantity, cartItems.price, products.name FROM cart,cartitems JOIN products on products.id WHERE cart.uid=${req.body.user_id} && cart_id=cart.id && products.id = product_id`,
+								`SELECT cart.id as cid, cart.total, product_id, quantity, cartItems.price, cartItems.id as item_id, products.name FROM cart,cartitems JOIN products on products.id WHERE cart.uid=${req.body.user_id} && cart_id=cart.id && products.id = product_id`,
 								function (error, results) {
 									var products = []
 									results.forEach((element) => {
 										products.push({
+											id: element.item_id,
 											name: element.name,
 											quantity: element.quantity,
 											price: element.price
