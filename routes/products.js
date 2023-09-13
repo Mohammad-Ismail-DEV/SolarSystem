@@ -29,6 +29,7 @@ router.post("/", function (req, res, next) {
 })
 
 router.post("/add_product", function (req, res, next) {
+	console.log(req.body)
 	if (req.body.name && req.body.price && req.body.info && req.body.category) {
 		connection.query(
 			`Select id FROM categories WHERE name='${req.body.category}'`,

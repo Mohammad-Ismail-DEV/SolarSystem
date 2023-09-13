@@ -31,10 +31,9 @@ router.post("/get_cart", function (req, res) {
 })
 
 router.post("/add_cart", function (req, res) {
-	var total = 0
-	req.body.products.forEach((element) => {
-		total = total + element.price * 1
-	})
+	console.log(req.body)
+	var total = req.body.product.price * req.body.quantity
+	
 	connection.query(
 		`Select id from cart where uid=${req.body.user_id}`,
 		function (error, results) {
@@ -45,20 +44,18 @@ router.post("/add_cart", function (req, res) {
 						"JSON.parse(JSON.stringify(results)).id",
 						JSON.parse(JSON.stringify(results))[0].id
 					)
-					req.body.products.forEach((element) => {
-						connection.query(
-							`Update cart set total=total+${total}; Insert into cartItems (cart_id, product_id, quantity, price) values(${
-								JSON.parse(JSON.stringify(results))[0].id
-							}, ${element.id}, 1 , ${
-								element.price
-							})`,
-							function (e) {
-								if (e) {
-									f = true
-								}
+					connection.query(
+						`Update cart set total=total+${total}; Insert into cartItems (cart_id, product_id, quantity, price) values(${
+							JSON.parse(JSON.stringify(results))[0].id
+						}, ${req.body.product.id}, ${req.body.quantity} , ${
+							req.body.product.price
+						})`,
+						function (e) {
+							if (e) {
+								f = true
 							}
-						)
-					})
+						}
+					)
 					if (f) {
 						res.send("Something Went Wrong! Try Again Later")
 					} else {
@@ -73,17 +70,15 @@ router.post("/add_cart", function (req, res) {
 					function (error, results) {
 						if (!error) {
 							var f = false
-							req.body.products.forEach((element) => {
-								connection.query(
-									`Insert into cartItems (cart_id, product_id, quantity, price) values(${results.insertId}, ${element.id}, ${element.quantity}, ${element.price})`,
-									function (e) {
-										if (e) {
-											console.log("e", e)
-											f = true
-										}
+							connection.query(
+								`Insert into cartItems (cart_id, product_id, quantity, price) values(${results.insertId}, ${req.body.product.id}, ${req.body.quantity} , ${req.body.product.price})`,
+								function (e) {
+									if (e) {
+										console.log("e", e)
+										f = true
 									}
-								)
-							})
+								}
+							)
 							if (f) {
 								res.send(
 									"Something Went Wrong! Try Again Later"
