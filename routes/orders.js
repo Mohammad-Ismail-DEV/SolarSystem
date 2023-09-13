@@ -78,12 +78,12 @@ router.post("/create_order", function (req, res) {
 			connection.query(
 				`Insert Into orders (uid, status) values (${req.body.user_id}, 'pending')`,
 				function (error, results) {
+					var e = false
 					result.products.forEach((element) => {
 						connection.query(
 							`Insert into orderProducts (order_id, product_id, quantity, order_price) values (${results.insertId}, ${element.product_id}, ${element.quantity}, ${element.price})`,
 							function (error, results) {
 								if (!error) {
-									var e = false
 									connection.query(
 										`Delete from cartItems Where cart_id=${req.body.cart_id}; Delete from cart Where id=${req.body.cart_id}`,
 										function (error, results) {
@@ -92,15 +92,15 @@ router.post("/create_order", function (req, res) {
 											}
 										}
 									)
-									if (e == false) {
-										res.send("Success")
-									}
 								} else {
 									console.log("error", error)
 								}
 							}
 						)
 					})
+					if (e == false) {
+						res.send({ id: results.insertId })
+					}
 				}
 			)
 		}
